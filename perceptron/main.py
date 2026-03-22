@@ -9,15 +9,20 @@ def main():
     X_full, y_full = datasets.load_iris(return_X_y=True)
 
     # Iris labels: 0=Setosa, 1=Versicolor, 2=Virginica
-    # For binary classification, we will only use Setosa (0) and Versicolor (1). We will ignore Virginica (2).
-    X = X_full[y_full != 2]
-    y = y_full[y_full != 2]
+    # Iris Setosa is perfectly linearly separable from both Iris Versicolor and Iris Virginica.
+    # Perceptron accuracy can be 100% with those classes.
+    #
+    # Versicolor and Virginica classes are not linearly separable.
+    # Perceptron accuracy will be less than 100% with those classes.
+    mask = y_full != 0
+    X = X_full[mask]
+    y = (y_full[mask] == 2).astype(int)  # Versicolor=0, Virginica=1
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
+        X, y, test_size=0.2, random_state=2
     )
 
-    model = Perceptron(leaning_rate=0.01, n_iters=1000)
+    model = Perceptron(learning_rate=0.1, n_iters=200)
     model.fit(np.array(X_train), np.array(y_train))
 
     predictions = model.predict(np.array(X_test))

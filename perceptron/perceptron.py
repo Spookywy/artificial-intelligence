@@ -4,8 +4,17 @@ import numpy as np
 
 
 class Perceptron:
-    def __init__(self, leaning_rate: float = 0.01, n_iters: int = 1000) -> None:
-        self.leaning_rate: float = leaning_rate
+    def __init__(self, learning_rate: float = 0.01, n_iters: int = 1000) -> None:
+        if learning_rate <= 0:
+            raise ValueError("Learning rate must be positive.")
+        if learning_rate > 1:
+            print(
+                "Warning: Learning rate is typically between 0 and 1. A learning rate greater than 1 may cause the model to fail to converge."
+            )
+        if n_iters <= 0:
+            raise ValueError("Number of iterations must be positive.")
+
+        self.learning_rate: float = learning_rate
         self.n_iters: int = n_iters
         self.weights: Optional[np.ndarray] = None
         self.bias: Optional[float] = None
@@ -28,7 +37,7 @@ class Perceptron:
             )
         return np.dot(X, self.weights) + self.bias
 
-    def activation_function(self, x: np.ndarray | float) -> np.ndarray | int:
+    def activation_function(self, x: np.ndarray | float) -> np.ndarray:
         """
         Activation function
 
@@ -38,7 +47,7 @@ class Perceptron:
 
         Returns
         -------
-        np.ndarray | int. During the training phase, it returns an int (0 or 1). During the prediction phase, it returns a numpy array of 0s and 1s.
+        np.ndarray. During the training phase, it returns a numpy array with a single element. During the prediction phase, it returns a numpy array of 0s and 1s.
         """
         return np.where(x >= 0, 1, 0)
 
@@ -55,13 +64,13 @@ class Perceptron:
             y > 0, 1, 0
         )  # equivalent to np.array([1 if i > 0 else 0 for i in y])
 
-    def compute_error(self, y_predicted: int, y_expected: int) -> int:
+    def compute_error(self, y_expected: int, y_predicted: int) -> int:
         return y_expected - y_predicted
 
     def update_weights_and_bias(self, error: int, X: np.ndarray) -> None:
         if self.weights is None or self.bias is None:
-            raise ValueError("Unitialized weights and bias can't be updated")
-        update = self.leaning_rate * error
+            raise ValueError("Uninitialized weights and bias can't be updated")
+        update = self.learning_rate * error
         self.weights += update * X
         self.bias += update
 
@@ -91,7 +100,7 @@ class Perceptron:
                 y_predicted = self.activation_function(linear_output)
 
                 # Update weights and bias
-                error = self.compute_error(int(y_predicted), cleaned_y[index])
+                error = self.compute_error(cleaned_y[index], int(y_predicted))
                 self.update_weights_and_bias(error, x_i)
 
     def predict(self, X: np.ndarray) -> np.ndarray:
